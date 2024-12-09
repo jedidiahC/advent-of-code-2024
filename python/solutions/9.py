@@ -101,23 +101,29 @@ def solve_part_two():
 
         # Try to find the left-most span of free space.
         free_block = None
-        curr_block = end_block.prev
-        while curr_block != head:
+        curr_block = head.next
+        while curr_block != end_block:
             if curr_block.file_id == -1 and curr_block.size >= end_block.size:
                 free_block = curr_block
-            curr_block = curr_block.prev
+                break
+            curr_block = curr_block.next
 
         if free_block == None:
             end_block = end_block.prev
             continue
 
         moved_block = Block(end_block.file_id, end_block.size)
+        free_block.size -= moved_block.size
+
         moved_block.prev = free_block.prev
         moved_block.prev.next = moved_block
-        moved_block.next = free_block
 
-        free_block.prev = moved_block
-        free_block.size -= moved_block.size
+        if free_block.size == 0:
+            moved_block.next = free_block.next
+            free_block.next.prev = moved_block
+        else:
+            moved_block.next = free_block
+            free_block.prev = moved_block
 
         end_block.file_id = -1
         end_block = end_block.prev
