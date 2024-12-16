@@ -1,5 +1,44 @@
+def print_christmas_tree(width, height, robots, seconds_elapsed):
+    map = []
+    for _ in range(height):
+        map.append(['.'] * width)
 
-def solve_part_one(width, height, test_file):
+    for robot in robots:
+        (position, velocity) = robot
+
+        if map[position[1]][position[0]] == ".":
+            map[position[1]][position[0]] = '1'
+        else:
+            map[position[1]][position[0]] = str(int('1') + 1)
+
+    # Check symmetrical.
+    line_threshold = 10
+    line_count = 0
+    for x in range(width):
+        line_count = 0
+        for y in range(1, height):
+            if map[y][x] != '.' and map[y - 1][x] != '.':
+                line_count += 1
+                if line_count > line_threshold:
+                    break
+            else:
+                line_count = 0
+
+        if line_count > line_threshold:
+            break
+
+    if line_count < line_threshold:
+        return
+
+    with open("christmas.txt", "a", encoding="utf8") as output_file:
+        output_file.write(str(seconds_elapsed))
+        output = '\n'.join([''.join(row) for row in map])
+        print(output)
+        output_file.write(output)
+        output_file.write("\n\n")
+
+
+def solve(width, height, test_file, seconds, should_print=False):
     robots = []
 
     with open(f"../input/{test_file}", "r", encoding="utf-8") as input_file:
@@ -10,13 +49,15 @@ def solve_part_one(width, height, test_file):
 
             robots.append((position, velocity))
 
-    for _ in range(100):
+    for current in range(seconds):
         for i, robot in enumerate(robots):
             robot = robots[i]
             (position, velocity) = robot
             new_position = [(position[0] + velocity[0]) %
                             width, (position[1] + velocity[1]) % height]
             robots[i] = (new_position, velocity)
+        if should_print:
+            print_christmas_tree(width, height, robots, current + 1)
 
     quadrants = {
         0: 0, 1: 0, 2: 0, 3: 0
@@ -44,5 +85,6 @@ def solve_part_one(width, height, test_file):
     print(score)
 
 
-solve_part_one(11, 7, "14.test")
-solve_part_one(101, 103, "14.in")
+solve(11, 7, "14.test", 100)
+solve(101, 103, "14.in", 100)
+solve(101, 103, "14.in", 1000000, True)
